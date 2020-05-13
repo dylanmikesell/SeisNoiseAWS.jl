@@ -49,7 +49,9 @@ end
 
 ## Now let's do an example of the data download procedure on a single column
 
-# To parallelize: We need a loop over all columns
+# We need a loop over all columns (i.e. days)
+# I don't think we parallelize here. To parellize I suggest we follow Tim's
+# suggestion and parallelize over the double loop over stations in this day.
 
 test_col = 1000 # this column has a few stations with data on this day
 print("Processing: ", date_range[test_col]," to ", date_range[test_col+1],"\n");
@@ -79,8 +81,9 @@ output_dir = joinpath(COR_DIR, the_date)
 
 t1 = now()
 # Here we need a double FOR Loop to do all data pairs
+# Can we do something else, where we do a pmap
 for ii = 1:length(S)
-    for jj = ii:length(S)
+    for jj = ii+1:length(S)
         print("Correlating ",S[ii].id," and ",S[jj].id,"\n")
         # process_raw!(S, fs) # demean, detrend, downsample, time align, taper
         S1 = process_raw( SeisData(S[ii]), fs )
@@ -92,9 +95,9 @@ for ii = 1:length(S)
         taper!.(R)
         bandpass!.(R,freqmin,freqmax,zerophase=true)
         # Compute the FFT and correlation in frequency domain
-        FFT = rfft.(R)
+        FFT = compute_fft.(R)
         whiten!.(FFT,freqmin,freqmax)
-        C = correlate(FFT[1],FFT[2],maxlag)
+        C = compute_cc(FFT[1],FFT[2],maxlag)
         clean_up!(C,freqmin,freqmax) # demean, detrend, taper, filter
 
         # Then need to save C for this date and station pair
@@ -105,6 +108,8 @@ for ii = 1:length(S)
         # abs_max!(C)
         # corrplot(C)
         # stack!( C )
+
+        # deallocate (not sure how much this helps or not)
         S1 = nothing
         S2 = nothing
         R = nothing
