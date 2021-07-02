@@ -1,7 +1,7 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-.DS_Store
+*.DS_Store
 /Manifest.toml
 /dev/
 /docs/build/
