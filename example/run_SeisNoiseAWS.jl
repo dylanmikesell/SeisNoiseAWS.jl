@@ -8,7 +8,8 @@ using Distributed
 # Thea: if you want to run tests, you can hard code a path here to a data folder that contains params.csv and stations.csv
 # default_path = "/Users/dmikesell/Documents/GitHub/esip_julia_aws/dev/20200615_102819/41808/"
 # default_path = "/Users/dmikesell/Documents/GitHub/esip_julia_aws/dev/20200615_102819/3470/"
-default_path = "/Users/dmikesell/Documents/GitHub/esip_julia_aws/dev/20200615_102819/12345/"
+# default_path = "/Users/dmikesell/Documents/GitHub/esip_julia_aws/dev/20200615_102819/12345/"
+default_path = "/Users/dmikesell/Documents/GitHub/esip_julia_aws/dev/20200615_102819/123/"
 
 # Example of the CLI call of this Julia file.
 #
@@ -61,6 +62,7 @@ df_params = SeisNoiseAWS.load_parameter_file( joinpath(basepath, "params.csv") )
 # ==============================================================================
 # Build the data availability table
 df_date = SeisNoiseAWS.build_availability_df(df_st)
+num_days = length(names(df_date))
 # Make boolean vectors from each column
 columns = collect( eachcol(df_date) )
 # Set the file length for downloading data
@@ -68,7 +70,7 @@ t_duration = Dates.Second(Dates.Day(1)).value # [s] one day in seconds
 # ==============================================================================
 # Loop over days
 t0a = now() # start timer
-for col = 2:9 #end-1 # skip the first column, which is station tag
+for col = 2 : num_days-1 # skip the first column, which is station tag
     if col == 1 # make sure user cannot try to use the station tag column
         continue
     end
